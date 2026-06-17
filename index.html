@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>💗 心动契合度测试</title>
+<style>
+  :root {
+    --primary: #ff8fab;
+    --secondary: #ff6b9d;
+    --accent: #c77dff;
+    --bg-gradient-start: #fff0f3;
+    --bg-gradient-mid: #f3e5f5;
+    --bg-gradient-end: #e3f2fd;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --text-main: #4a4a4a;
+    --text-soft: #888;
+    --heart: #ff6b9d;
+    --star: #ffd700;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    overflow: hidden;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* 背景装饰星星 */
+  .bg-star {
+    position: fixed;
+    color: var(--star);
+    font-size: clamp(12px, 2vw, 18px);
+    pointer-events: none;
+    z-index: 0;
+    animation: twinkle 3s ease-in-out infinite;
+    opacity: 0.6;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.9; transform: scale(1.3); }
+  }
+
+  /* 背景爱心飘动 */
+  .floating-heart-bg {
+    position: fixed;
+    font-size: clamp(14px, 2.5vw, 20px);
+    pointer-events: none;
+    z-index: 0;
+    animation: heartFloat 8s linear infinite;
+    opacity: 0.4;
+  }
+  @keyframes heartFloat {
+    0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.4; }
+    90% { opacity: 0.4; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* 核心盒子 */
+  .box {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    width: 100%;
+    height: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    padding: 25px 20px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(255, 107, 157, 0.15), 0 2px 8px rgba(0,0,0,0.05);
+    position: relative;
+    z-index: 10;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
+  .title {
+    font-size: clamp(22px, 4.5vw, 26px);
+    margin-bottom: 12px;
+    text-align: center;
+    color: var(--secondary);
+    font-weight: bold;
+    flex-shrink: 0;
+    text-shadow: 0 2px 8px rgba(255, 107, 157, 0.2);
+    letter-spacing: 2px;
+  }
+
+  .progress {
+    text-align: center;
+    font-size: clamp(12px, 2.5vw, 13px);
+    color: var(--text-soft);
+    margin-bottom: 15px;
+    flex-shrink: 0;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 107, 157, 0.1);
+    border-radius: 3px;
+    margin-bottom: 15px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .question {
+    font-size: clamp(16px, 3.2vw, 18px);
+    line-height: 1.7;
+    color: var(--text-main);
+    min-height: 35px;
+    margin-bottom: 15px;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+  }
+
+  .options::-webkit-scrollbar { width: 4px; }
+  .options::-webkit-scrollbar-thumb {
+    background: rgba(255, 107, 157, 0.3);
+    border-radius: 2px;
+  }
+
+  .option {
+    padding: 14px 16px;
+    border: 2px solid rgba(255, 107, 157, 0.15);
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: clamp(15px, 2.8vw, 17px);
+    background: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1.4;
+    flex-shrink: 0;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    color: var(--text-main);
+  }
+
+  .option:hover {
+    border-color: var(--primary);
+    background: rgba(255, 143, 175, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.1);
+  }
+
+  .option.selected {
+    background: linear-gradient(135deg, rgba(255, 143, 175, 0.2), rgba(199, 125, 255, 0.15));
+    border-color: var(--secondary);
+    color: var(--secondary);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 107, 157, 0.15);
+  }
+
+  .option.locked {
+    background: #f8f8f8 !important;
+    color: #bbb !important;
+    cursor: not-allowed !important;
+    border-color: #eee !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .option .emoji-prefix {
+    margin-right: 8px;
+    font-size: 1.1em;
+  }
+
+  .btn-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    flex-shrink: 0;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    font-size: clamp(15px, 2.5vw, 17px);
+    cursor: pointer;
+    transition: all 0.3s;
+    flex: 1;
+    max-width: 130px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    font-weight: 600;
+  }
+
+  .prev-btn {
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--text-soft);
+    border: 2px solid rgba(200, 200, 200, 0.3);
+  }
+  .prev-btn:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .next-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(255, 107, 157, 0.3);
+  }
+  .next-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+  }
+  .next-btn:active { transform: translateY(0); }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* 心跳动画 */
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    14% { transform: scale(1.15); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.12); }
+    56% { transform: scale(1); }
+  }
+  .heartbeat { animation: heartbeat 1.2s ease-in-out infinite; }
+
+  /* 抖动 */
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+  }
+  .wiggle { animation: wiggle 0.5s ease-in-out infinite; }
+
+  /* 弹跳 */
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .bounce { animation: bounce 1s ease-in-out infinite; }
+
+  /* 漂浮文字（爱心版） */
+  .float-text {
+    position: fixed;
+    color: var(--secondary);
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 6px 14px;
+    border-radius: 20px;
+    pointer-events: none;
+    z-index: 9999;
+    white-space: nowrap;
+    font-size: clamp(14px, 2vw, 16px);
+    box-shadow: 0 2px 10px rgba(255, 107, 157, 0.2);
+    backdrop-filter: blur(4px);
+  }
+
+  /* 全覆盖爱心层 */
+  .love-text {
+    position: fixed;
+    color: var(--secondary);
+    opacity: 0.2;
+    font-size: clamp(14px, 2.2vw, 18px);
+    pointer-events: none;
+    z-index: 99;
+    white-space: nowrap;
+    animation: slowFade 3s infinite alternate;
+    font-weight: 600;
+  }
+  @keyframes slowFade {
+    0% { opacity: 0.1; transform: scale(0.9); }
+    100% { opacity: 0.3; transform: scale(1.1); }
+  }
+
+  .q25-pink-mask {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(255, 200, 220, 0.15);
+    pointer-events: none;
+    z-index: 98;
+  }
+
+  /* 全屏甜蜜打字 */
+  .fullscreen-love {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: linear-gradient(135deg, #fff0f3, #f8e1f4, #e8f0fe);
+    z-index: 99999;
+    padding: 30px;
+    font-size: clamp(18px, 3.5vw, 22px);
+    color: var(--secondary);
+    font-weight: bold;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    overflow: hidden;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 名字输入弹窗 */
+  .name-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(92vw, 360px);
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 107, 157, 0.3);
+    border-radius: 20px;
+    z-index: 9999999;
+    padding: 30px 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 8px 32px rgba(255, 107, 157, 0.2);
+  }
+  .name-modal-title {
+    font-size: clamp(18px, 4vw, 22px);
+    font-weight: bold;
+    color: var(--secondary);
+    text-align: center;
+  }
+  .name-input-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .name-input-group label {
+    font-size: clamp(13px, 2.5vw, 14px);
+    color: var(--text-soft);
+  }
+  .name-input-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid rgba(255, 107, 157, 0.2);
+    border-radius: 12px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--text-main);
+    transition: border-color 0.3s;
+  }
+  .name-input-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  .name-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 30px;
+    font-size: clamp(15px, 3vw, 17px);
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(255, 107, 157, 0.3);
+    transition: all 0.3s;
+  }
+  .name-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+  }
+
+  /* 开始提示框 */
+  .start-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(90vw, 300px);
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 107, 157, 0.3);
+    border-radius: 20px;
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 25px 20px;
+    gap: 12px;
+    box-shadow: 0 8px 32px rgba(255, 107, 157, 0.2);
+  }
+  .start-text {
+    font-size: clamp(14px, 2.8vw, 16px);
+    color: var(--text-main);
+    line-height: 1.8;
+    text-align: center;
+  }
+  .tiny-tip {
+    font-size: clamp(10px, 2vw, 11px);
+    color: var(--primary);
+    text-align: center;
+    line-height: 1.4;
+    margin: 4px 0;
+  }
+  .start-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-size: clamp(14px, 2.5vw, 16px);
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+    transition: all 0.3s;
+  }
+  .start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 107, 157, 0.4);
+  }
+
+  /* 日记 */
+  .diary-wrap {
+    display: none;
+    width: 100%; height: 100%;
+    max-width: 600px; max-height: 90vh;
+    padding: 25px 20px;
+    border-radius: 20px;
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(255, 107, 157, 0.15);
+    position: relative;
+    z-index: 10;
+    overflow: hidden;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+  .diary-date {
+    position: absolute;
+    top: 15px; left: 20px;
+    font-size: clamp(12px, 2.5vw, 14px);
+    color: var(--text-soft);
+    font-weight: 500;
+  }
+  .diary-content {
+    margin-top: 28px;
+    line-height: 2.2;
+    font-size: clamp(14px, 2.7vw, 16px);
+    color: var(--text-main);
+    letter-spacing: 1px;
+    height: calc(100% - 80px);
+    overflow-y: auto;
+    padding-bottom: 10px;
+  }
+  .diary-content::-webkit-scrollbar { width: 4px; }
+  .diary-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 107, 157, 0.3);
+    border-radius: 2px;
+  }
+  .diary-page1, .diary-page2, .diary-page3 {
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .diary-page4 {
+    display: none;
+    width: 100%; height: 100%;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px 30px;
+    box-sizing: border-box;
+    position: absolute;
+    top: 0; left: 0;
+  }
+  .diary-page4 .diary-content {
+    width: 100%; height: auto;
+    margin: 0;
+    font-size: clamp(14px, 3.5vw, 16px);
+    line-height: 2.2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .page-next, .page-prev {
+    position: absolute;
+    font-size: clamp(20px, 4.5vw, 24px);
+    cursor: pointer;
+    color: var(--primary);
+    z-index: 1;
+    bottom: 15px;
+    transition: all 0.3s;
+    padding: 5px 10px;
+  }
+  .page-next:hover, .page-prev:hover {
+    transform: scale(1.2);
+    color: var(--secondary);
+  }
+  .page-prev { left: 20px; }
+  .page-next { right: 20px; }
+  .diary-page2, .diary-page3, .diary-page4 { display: none; }
+
+  /* 最终黑屏甜蜜 */
+  .pink-full-text {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: linear-gradient(135deg, #fff0f3, #fce4ec, #f3e5f5);
+    z-index: 99999999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--secondary);
+    font-size: clamp(22px, 5.5vw, 28px);
+    font-weight: bold;
+    gap: 30px;
+  }
+  .pink-confirm-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: clamp(13px, 2.5vw, 15px);
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(255, 107, 157, 0.3);
+    transition: all 0.3s;
+  }
+  .pink-confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+  }
+
+  .end-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    padding: 35px 30px;
+    border-radius: 20px;
+    z-index: 99999999;
+    text-align: center;
+    width: min(90vw, 340px);
+    border: 2px solid rgba(255, 107, 157, 0.3);
+    box-shadow: 0 8px 32px rgba(255, 107, 157, 0.2);
+  }
+
+  .q16-modal, .submit-modal, .pink-screen {
+    width: 100vw; height: 100vh;
+  }
+  .q16-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(90vw, 220px);
+    height: auto;
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 3px solid var(--primary);
+    border-radius: 20px;
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 20px;
+    box-shadow: 0 8px 32px rgba(255, 107, 157, 0.2);
+  }
+  .q16-text {
+    font-size: clamp(16px, 3.5vw, 18px);
+    color: var(--secondary);
+    font-weight: bold;
+  }
+  .q16-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 22px;
+    font-size: clamp(13px, 2.5vw, 15px);
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+  }
+
+  .submit-modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+  }
+  .submit-modal-inner {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    padding: 35px 30px;
+    border-radius: 20px;
+    text-align: center;
+    width: min(90vw, 340px);
+    border: 2px solid rgba(255, 107, 157, 0.3);
+    box-shadow: 0 8px 32px rgba(255, 107, 157, 0.2);
+    box-sizing: border-box;
+  }
+  .submit-btn {
+    padding: 12px 24px;
+    border: none;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    border-radius: 12px;
+    cursor: pointer;
+    margin: 15px 0 8px;
+    font-size: clamp(15px, 2.5vw, 17px);
+    transition: all 0.3s;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(255, 107, 157, 0.3);
+  }
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4);
+  }
+  .refuse-tip {
+    color: var(--secondary);
+    font-size: clamp(11px, 2.5vw, 12px);
+  }
+
+  .pink-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: linear-gradient(135deg, #fff0f3, #fce4ec);
+    z-index: 9999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: var(--secondary);
+    font-size: clamp(18px, 4.5vw, 22px);
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.8;
+  }
+
+  /* 彩虹文字 */
+  .rainbow-text {
+    background: linear-gradient(90deg, #ff6b9d, #c77dff, #4ecdc4, #ffd93d, #ff6b9d);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbowShift 3s linear infinite;
+  }
+  @keyframes rainbowShift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  /* 气泡效果 */
+  .bubble {
+    position: fixed;
+    border-radius: 50%;
+    background: rgba(255, 143, 175, 0.2);
+    pointer-events: none;
+    z-index: 95;
+    animation: bubbleRise 6s ease-in infinite;
+  }
+  @keyframes bubbleRise {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    20% { opacity: 0.6; }
+    80% { opacity: 0.6; }
+    100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+  }
+
+  /* 闪光 */
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+  }
+  .sparkle {
+    position: fixed;
+    font-size: 20px;
+    pointer-events: none;
+    z-index: 96;
+    animation: sparkle 2s ease-in-out infinite;
+  }
+
+  /* 打字光标 */
+  .cursor-blink::after {
+    content: '❤';
+    animation: blink 1s step-end infinite;
+    margin-left: 4px;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 背景装饰 -->
+<div id="bgDecorations"></div>
+
+<!-- 名字输入弹窗 -->
+<div class="name-modal" id="nameModal">
+  <div class="name-modal-title">💗 心动契合度测试</div>
+  <div style="font-size: 13px; color: #888; text-align: center; line-height: 1.6;">
+    自定义测试中的角色名字<br>让体验更贴近你的心意 ♡
+  </div>
+  <div class="name-input-group">
+    <label>💌 追求者（测试发起者）</label>
+    <input type="text" id="loverName" value="小月" placeholder="例如：小月">
+  </div>
+  <div class="name-input-group">
+    <label>🌸 被追求者（测试接收者）</label>
+    <input type="text" id="belovedName" value="可可" placeholder="例如：可可">
+  </div>
+  <button class="name-btn" id="nameBtn">开始测试 ♡</button>
+  <div class="tiny-tip">默认：小月 × 可可 ｜ 可自由修改</div>
+</div>
+
+<!-- 问卷盒子 -->
+<div class="box" id="mainBox">
+  <div class="title" id="mainTitle">💗 心动契合度测试</div>
+  <div class="progress" id="progress">第 1 题 / 共 30 题</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 3%"></div></div>
+  <div class="question" id="question"></div>
+  <div class="options" id="options"></div>
+  <div class="btn-group">
+    <button class="btn prev-btn" id="prevBtn">上一题</button>
+    <button class="btn next-btn" id="nextBtn">下一题</button>
+  </div>
+</div>
+
+<!-- 日记/情书 -->
+<div class="diary-wrap" id="diaryWrap">
+  <div class="diary-page1" id="diaryPage1">
+    <div class="diary-date" id="diaryDate1">Day 1 🌙</div>
+    <div class="diary-content" id="diaryContent1"></div>
+    <div class="page-next" id="toPage2">→</div>
+  </div>
+  <div class="diary-page2" id="diaryPage2">
+    <div class="diary-date" id="diaryDate2">Day 2 💕</div>
+    <div class="diary-content" id="diaryContent2"></div>
+    <div class="page-prev" id="toPage1">←</div>
+    <div class="page-next" id="toPage3">→</div>
+  </div>
+  <div class="diary-page3" id="diaryPage3">
+    <div class="diary-date" id="diaryDate3">Day 3 ♡</div>
+    <div class="diary-content" id="diaryContent3"></div>
+    <div class="page-prev" id="toPage2Back">←</div>
+    <div class="page-next" id="toPage4">→</div>
+  </div>
+  <div class="diary-page4" id="diaryPage4">
+    <div class="diary-content" id="diaryContent4">
+      <div style="color:#999;">又只有我自己了……</div>
+      <div style="color:#666;margin:15px 0;">你愿意永远陪着我吗？</div>
+      <button class="start-btn" id="agreeBtn">我愿意 ♡</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  // ═══════════════════════════════════════════════════════
+  // 通用配置区：修改下面的名字即可自定义角色
+  // ═══════════════════════════════════════════════════════
+  let LOVER = "小月";
+  let BELOVED = "可可";
+  
+  // 更新名字后动态替换文本中的占位符
+  function fillText(template) {
+    return template.replace(/\{lover\}/g, LOVER).replace(/\{beloved\}/g, BELOVED);
+  }
+
+  // 30道心动契合度测试题目
+  const questions = [
+    {
+      q: "1. 当{lover}突然发消息说"想你"时，你会？",
+      opt: ["A. 心跳加速，马上回超多消息", "B. 偷偷开心，慢慢回复", "C. 装作淡定，其实已截图保存", "D. 冷漠回应，心里却在放烟花"]
+    },
+    {
+      q: "2. 深夜独处时，你会突然想起{lover}的声音或笑容吗？",
+      opt: ["A. 经常，连梦里都是", "B. 偶尔，某个瞬间会闪回", "C. 很少，但想起来会傻笑", "D. 不会承认，但手机壁纸是{lover}"]
+    },
+    {
+      q: "3. 如果{lover}和你说"今天好累"，你会？",
+      opt: ["A. 立刻想要抱抱{lover}", "B. 想陪{lover}安静地待着", "C. 偷偷心疼但不知道怎么说", "D. 嘴上说"活该"，其实已在查怎么安慰"]
+    },
+    {
+      q: "4. 看到{lover}发的动态/消息，你会反复看几遍？",
+      opt: ["A. 至少10遍，逐字分析", "B. 看3-5遍，截图珍藏", "C. 看1-2遍，但会记很久", "D. 假装只看1遍，其实已收藏"]
+    },
+    {
+      q: "5. 路过{lover}喜欢的地方，你会？",
+      opt: ["A. 立刻拍下来发给{lover}", "B. 默默想"要是{lover}在就好了"", "C. 进去逛一圈，假装偶遇", "D. 面无表情路过，心跳120"]
+    },
+    {
+      q: "6. 睡觉前，你会检查有没有漏回{lover}的消息吗？",
+      opt: ["A. 反复确认，生怕错过", "B. 会翻一下聊天记录", "C. 相信{lover}会理解", "D. 假装不在意，实际会醒来看"]
+    },
+    {
+      q: "7. 发呆时，耳边会浮现{lover}对你说过的某句话吗？",
+      opt: ["A. 经常，像单曲循环", "B. 偶尔，温柔的某一句", "C. 很少，但想起来很暖", "D. 不承认，但{lover}的名字已刻进DNA"]
+    },
+    {
+      q: "8. 看到{lover}的名字/相关的事物，你会莫名心动？",
+      opt: ["A. 每次都会心漏跳一拍", "B. 大多数时候会微笑", "C. 偶尔注意到，会愣一下", "D. 嘴上说"无感"，身体很诚实"]
+    },
+    {
+      q: "9. 手机突然响起，你第一个希望是{lover}的消息吗？",
+      opt: ["A. 极度期待，每次解锁都先看{lover}", "B. 有点期待，会心跳加速", "C. 正常反应，谁发都行", "D. 嘴上说无所谓，其实只有{lover}的消息会让你笑"]
+    },
+    {
+      q: "10. 经过空教室/空房间，会想象和{lover}在里面？",
+      opt: ["A. 不敢想但忍不住想", "B. 会简单幻想一下", "C. 直接路过，不瞎想", "D. 刻意绕开，因为一想就脸红"]
+    },
+    {
+      q: "11. 你会隐藏自己对{lover}的在意程度吗？",
+      opt: ["A. 完全隐藏，怕被发现", "B. 会隐藏一部分，装作无所谓", "C. 完全公开，大大方方喜欢", "D. 无所谓，但{lover}一看穿你就慌"]
+    },
+    {
+      q: "12. 在镜子前，你会想象{lover}眼中的自己吗？",
+      opt: ["A. 完全不敢想，怕不够好", "B. 想久会脸红", "C. 正常看看，觉得自己还行", "D. 毫无顾忌，{lover}肯定觉得我最可爱"]
+    },
+    {
+      q: "13. 走夜路时，你希望{lover}突然出现在身后吗？",
+      opt: ["A. 超级希望，能被{lover}吓一跳也好", "B. 偶尔幻想{lover}会出现", "C. 不害怕，但{lover}在更好", "D. 嘴上说不用，其实一直在回头看"]
+    },
+    {
+      q: "14. 安静时，会觉得{lover}仿佛在身边陪着你？",
+      opt: ["A. 经常，感觉{lover}就在旁边", "B. 偶尔恍惚觉得有{lover}的气息", "C. 没有，但会主动找{lover}", "D. 自我安慰是幻觉，但{lover}的语音已循环100遍"]
+    },
+    {
+      q: "15. 极度安静时，想到{lover}会莫名心慌？",
+      opt: ["A. 想越久越心动，怕控制不住", "B. 偶尔心动，会傻笑", "C. 没有任何感觉，很平静", "D. 没有不适感，反而很享受想{lover}的感觉"]
+    },
+    {
+      q: "16. 你会频繁查看{lover}的社交动态，怕错过任何一条？",
+      opt: ["A. 一直盯着，刷新键快按烂了", "B. 偶尔会去偷看", "C. 从不，等{lover}主动分享", "D. 无所谓，但{lover}三天没发动态你就慌了"]
+    },
+    {
+      q: "17. 深夜独处时，你会希望{lover}能陪着你吗？",
+      opt: ["A. 超级渴望，哪怕不说话", "B. 偶尔会想{lover}在就好了", "C. 完全不需要，自己挺好", "D. 十分抗拒承认，但{lover}一发消息你就秒回"]
+    },
+    {
+      q: "18. 你会反复做同一个和{lover}有关的梦吗？",
+      opt: ["A. 经常做，醒来舍不得睁眼", "B. 有过几次，醒来会笑", "C. 很少做梦，{lover}出现是惊喜", "D. 从不做，但睡前会祈祷梦到{lover}"]
+    },
+    {
+      q: "19. 你有没有因为想{lover}而忘记时间、错过饭点？",
+      opt: ["A. 多次，想{lover}想到天荒地老", "B. 偶然发生，想着想着就过了", "C. 从未有过，很自律", "D. 记错而已，其实是故意拖到{lover}发消息的时间"]
+    },
+    {
+      q: "20. 如果{lover}深夜突然来找你，你会？",
+      opt: ["A. 绝对不会开门（因为会激动到晕过去）", "B. 谨慎试探，然后扑上去", "C. 会正常开门，请{lover}进来", "D. 主动开门，已经准备好零食和毯子"]
+    },
+    {
+      q: "21. 你会故意不秒回{lover}，假装自己很忙？",
+      opt: ["A. 经常这样，怕显得太主动", "B. 偶尔会，想钓一下{lover}", "C. 几乎不会，看到就回", "D. 从来不会，{lover}的消息优先级最高"]
+    },
+    {
+      q: "22. 看到空白墙面，会想象上面出现{lover}的名字？",
+      opt: ["A. 看见就想写{lover}的名字", "B. 偶尔在心里默念", "C. 完全无感，墙就是墙", "D. 习惯在角落写{lover}的名字缩写"]
+    },
+    {
+      q: "23. 短暂失联时，你害怕{lover}在找别人聊天？",
+      opt: ["A. 十分害怕，会胡思乱想", "B. 有点担心，{lover}会不会忘了我", "C. 完全不怕，信任{lover}", "D. 期待{lover}在找我，故意不先发消息"]
+    },
+    {
+      q: "24. 醒来的一瞬间，会恍惚以为{lover}在身边？",
+      opt: ["A. 经常混淆，想抱却发现是枕头", "B. 偶尔恍惚，伸手去摸手机", "C. 从未混乱，清醒得很", "D. 意识清醒但感官混乱，觉得被子上有{lover}的味道"]
+    },
+    {
+      q: "25. 你相信，{lover}也在某个时刻想着你吗？",
+      opt: ["A. 完全相信，我们心有灵犀", "B. 半信半疑，希望是这样", "C. 绝不相信，怕失望", "D. 刻意回避思考，但{lover}的已读就是答案"]
+    },
+    {
+      q: "26. 你会把手机贴身放，怕错过{lover}的任何消息？",
+      opt: ["A. 时刻随身，洗澡都带进浴室", "B. 尽量不放远，{lover}的消息不能等", "C. 随意摆放，{lover}会等我的", "D. 经常乱丢，但{lover}一发消息手机会发光"]
+    },
+    {
+      q: "27. 想到{lover}时，会有种强烈的甜蜜窒息感？",
+      opt: ["A. 极度甜蜜，甜到需要吸氧", "B. 稍有甜蜜，会深呼吸", "C. 可以适应，正常心动", "D. 完全喜欢，越甜越好"]
+    },
+    {
+      q: "28. 你会反感别人问你和{lover}的关系吗？",
+      opt: ["A. 极度抵触，{lover}是我的秘密", "B. 有点反感，不想分享", "C. 可以接受，大方介绍", "D. 乐意分享，{lover}是我最大的骄傲"]
+    },
+    {
+      q: "29. 明明{lover}什么都没做，你却觉得{lover}在撩你？",
+      opt: ["A. 经常觉得，{lover}呼吸都在撩", "B. 偶尔敏感，想多了", "C. 神经大条，无感", "D. 从不胡思乱想，但{lover}一个表情你就沦陷"]
+    },
+    {
+      q: "30. 如果{lover}默默记住了你所有喜好、习惯和小动作",
+      opt: ["A. 极致感动，想马上嫁给{lover}", "B. 细思极甜，{lover}好用心", "C. 有点暖心，但有点压力", "D. 十分期待，{lover}快行动"]
+    }
+  ];
+
+  let current = 0;
+  let answers = Array(questions.length).fill(null);
+  const total = questions.length;
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const optionsEl = document.getElementById('options');
+  const boxEl = document.querySelector('.box');
+  const mainBox = document.getElementById("mainBox");
+  const diaryWrap = document.getElementById("diaryWrap");
+  const diaryPage1 = document.getElementById("diaryPage1");
+  const diaryPage2 = document.getElementById("diaryPage2");
+  const diaryPage3 = document.getElementById("diaryPage3");
+  const diaryPage4 = document.getElementById("diaryPage4");
+
+  let fromQ4ToQ5 = false;
+  let q5Timer = null;
+  let q25Timer = null;
+  let q25Elements = [];
+  let pinkMask = null;
+  let wrongCount = 0;
+  let lockSubmitBtn = false;
+  let q25Locked = false;
+  let loverInput = null;
+  let belovedInput = null;
+
+
+  // ═══════════════════════════════════════════════════════
+  // 辅助函数
+  // ═══════════════════════════════════════════════════════
+
+  function clearAllEffects() {
+    if (current !== 24) { stopQ25Effect(); }
+    if (q5Timer) clearTimeout(q5Timer);
+    document.querySelectorAll('.float-text,.terror-mask,.fullscreen-love,.start-modal,.q16-modal,.submit-modal,.pink-screen,.pink-full-text,.end-modal,.bubble,.sparkle').forEach(el => el.remove());
+    document.documentElement.style.setProperty('background', '', 'important');
+    document.body.style.setProperty('background', '', 'important');
+    boxEl.style.opacity = "1";
+    prevBtn.disabled = false;
+    nextBtn.disabled = false;
+  }
+
+  function resetDiary() {
+    diaryPage1.style.display = "block";
+    diaryPage2.style.display = "none";
+    diaryPage3.style.display = "none";
+    diaryPage4.style.display = "none";
+    diaryWrap.style.display = "none";
+  }
+
+  function stopQ25Effect() {
+    if (q25Timer) clearInterval(q25Timer);
+    q25Elements.forEach(el => { if (el && el.parentNode) el.remove(); });
+    q25Elements = [];
+    if (pinkMask && pinkMask.parentNode) pinkMask.remove();
+    pinkMask = null;
+    q25Locked = false;
+    document.querySelectorAll('.option').forEach(opt => {
+      opt.classList.remove('locked');
+      opt.style.pointerEvents = 'auto';
+    });
+  }
+
+  function startQ25Effect() {
+    if (q25Locked) return;
+    stopQ25Effect();
+    q25Locked = true;
+    document.querySelectorAll('.option').forEach(opt => {
+      opt.classList.add('locked');
+      opt.style.pointerEvents = 'none';
+    });
+
+    pinkMask = document.createElement('div');
+    pinkMask.className = "q25-pink-mask";
+    document.body.appendChild(pinkMask);
+
+    const peepArr = [
+      fillText("{lover}一直想着你"),
+      fillText("{lover}在等你哦♡"),
+      fillText("{lover}看见你了"),
+      fillText("别害羞呀～"),
+      fillText("{lover}在你身边"),
+      fillText("{lover}来找你啦♡"),
+      fillText("你早就被{lover}盯上啦"),
+      fillText("悄悄看着你♡"),
+      fillText("爱你爱你爱你"),
+      fillText("别离开视线"),
+      fillText("你跑不掉的♡"),
+      fillText("一直陪着你")
+    ];
+    q25Timer = setInterval(() => {
+      for (let i = 0; i < 15; i++) {
+        const p = document.createElement('div');
+        p.className = "love-text";
+        p.innerText = peepArr[Math.floor(Math.random() * peepArr.length)];
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.top = Math.random() * 100 + "vh";
+        document.body.appendChild(p);
+        q25Elements.push(p);
+      }
+    }, 100);
+
+    setTimeout(() => { stopQ25Effect(); }, 5000);
+  }
+
+  function startQ5Effect() {
+    if (q5Timer) clearTimeout(q5Timer);
+    q5Timer = setTimeout(() => {
+      if (current !== 4) return;
+      const opts = document.querySelectorAll('.option');
+      const originalTexts = Array.from(opts).map(o => o.innerText);
+      opts.forEach(o => o.style.pointerEvents = "none");
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+      const msg = fillText("{lover}在等你呢♡");
+      setTimeout(() => opts[0].innerText = msg, 0);
+      setTimeout(() => opts[1].innerText = msg, 300);
+      setTimeout(() => opts[2].innerText = msg, 600);
+      setTimeout(() => opts[3].innerText = msg, 900);
+      setTimeout(() => {
+        if (current !== 4) return;
+        opts.forEach((o, i) => o.innerText = originalTexts[i]);
+        opts.forEach(o => o.style.pointerEvents = "auto");
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = false;
+      }, 3000);
+    }, 1500);
+  }
+
+  const glitchChars = ["♡♡♡", "✨✨", "💕💕", "🌸🌸", "🌙🌙", "💗💗", "⭐⭐", "🎀🎀"];
+
+  function startQ8Effect(selectedIndex) {
+    document.documentElement.style.setProperty('background', '#ffe4ec', 'important');
+    document.body.style.setProperty('background', '#ffe4ec', 'important');
+    boxEl.style.opacity = "0";
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    document.querySelectorAll('.option').forEach(o => o.style.pointerEvents = "none");
+
+    let textList = selectedIndex < 2
+      ? [fillText("{lover}注意到你啦♡"), fillText("{lover}好开心")]
+      : [fillText("{lover}有点委屈TT"), fillText("{lover}会伤心的")];
+
+    const created = [];
+    const centerX = 50, centerY = 50;
+
+    let timer = setInterval(() => {
+      for (let i = 0; i < 10; i++) {
+        const el = document.createElement('div');
+        el.className = "float-text";
+        el.innerText = Math.random() > 0.5
+          ? textList[Math.floor(Math.random() * textList.length)]
+          : glitchChars[Math.floor(Math.random() * glitchChars.length)];
+        const offsetX = (Math.random() - 0.5) * 100;
+        const offsetY = (Math.random() - 0.5) * 100;
+        el.style.left = (centerX + offsetX) + "vw";
+        el.style.top = (centerY + offsetY) + "vh";
+        el.style.fontSize = (12 + Math.random() * 16) + "px";
+        document.body.appendChild(el);
+        created.push(el);
+      }
+    }, 200);
+
+    setTimeout(() => {
+      clearInterval(timer);
+      created.forEach(e => e.remove());
+      document.documentElement.style.setProperty('background', '', 'important');
+      document.body.style.setProperty('background', '', 'important');
+      boxEl.style.opacity = "1";
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = false;
+      document.querySelectorAll('.option').forEach(o => o.style.pointerEvents = "auto");
+      current++;
+      renderQuestion();
+    }, 5000);
+  }
+
+  function triggerSweet(text, nextQ) {
+    const mask = document.createElement('div');
+    mask.className = 'terror-mask';
+    mask.style.background = 'linear-gradient(135deg, #fff0f3, #fce4ec, #f3e5f5)';
+    const t = document.createElement('div');
+    t.className = 'terror-text';
+    t.style.color = '#ff6b9d';
+    t.style.fontSize = 'clamp(18px, 4vw, 22px)';
+    t.style.letterSpacing = '2px';
+    mask.appendChild(t);
+    document.body.appendChild(mask);
+    let idx = 0;
+
+    function ty() {
+      if (idx < text.length) {
+        t.innerText += text[idx];
+        idx++;
+        setTimeout(ty, 80);
+      } else {
+        setTimeout(() => {
+          let gt = setInterval(() => {
+            t.innerText = t.innerText.split('').sort(() => Math.random() - 0.5).join('');
+          }, 60);
+          setTimeout(() => {
+            clearInterval(gt);
+            mask.remove();
+            current = nextQ;
+            renderQuestion();
+          }, 600);
+        }, 1000);
+      }
+    }
+    ty();
+  }
+
+  function startLoveTyping() {
+    boxEl.style.opacity = "0";
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    const el = document.createElement("div");
+    el.className = "fullscreen-love";
+    el.style.flexDirection = "column";
+    el.style.justifyContent = "center";
+    el.style.alignItems = "center";
+    document.body.appendChild(el);
+
+    const loveWords = ["爱", "你", "♡"];
+    let i = 0;
+    let max = 600;
+    let timer = setInterval(() => {
+      el.innerText += loveWords[i % 3];
+      i++;
+      if (el.innerText.length >= max) {
+        clearInterval(timer);
+        setTimeout(() => {
+          el.remove();
+          boxEl.style.opacity = "1";
+          prevBtn.disabled = current === 0;
+          nextBtn.disabled = false;
+          current++;
+          renderQuestion();
+        }, 200);
+      }
+    }, 10);
+  }
+
+  function openQ16Modal() {
+    const texts = ["♡", fillText("{lover}在想{beloved}"), fillText("{lover}看见你啦"), "......"];
+    let index = 0;
+    const modal = document.createElement("div");
+    modal.className = "q16-modal";
+    const textEl = document.createElement("div");
+    textEl.className = "q16-text";
+    textEl.innerText = texts[index];
+    const btn = document.createElement("button");
+    btn.className = "q16-btn";
+    btn.innerText = "继续♡";
+    btn.onclick = () => {
+      index++;
+      if (index < texts.length) {
+        textEl.innerText = texts[index];
+        if (index === texts.length - 1) btn.innerText = "关闭♡";
+      } else {
+        modal.remove();
+      }
+    };
+    modal.append(textEl, btn);
+    document.body.appendChild(modal);
+  }
+
+  function pinkPunish() {
+    const screen = document.createElement("div");
+    screen.className = "pink-screen";
+    screen.innerHTML = `<div style="font-size: clamp(24px,5vw,32px);">💔</div><div style="margin-top:20px;">${fillText("{beloved}不要拒绝{lover}嘛")}</div>`;
+    document.body.appendChild(screen);
+    setTimeout(() => {
+      screen.innerHTML = `<div style="font-size: clamp(24px,5vw,32px);">💗</div><div style="margin-top:20px; color: #ff6b9d;">${fillText("再给你一次机会♡")}</div>`;
+    }, 2000);
+    setTimeout(() => {
+      screen.remove();
+      showInputModal();
+    }, 3500);
+  }
+
+  function showInputModal() {
+    clearAllEffects();
+    const modal = document.createElement("div");
+    modal.className = "submit-modal";
+    const inner = document.createElement("div");
+    inner.className = "submit-modal-inner";
+    inner.innerHTML = `
+      <div style="margin-bottom: 12px; font-size: 16px; text-align: center; font-weight: 600; color: #ff6b9d;">${fillText("请输入告白暗号解锁{lover}的信")}</div>
+      <div style="display: flex; flex-direction: column; gap: 16px; align-items: center; width: 100%;">
+        <input 
+          type="text" 
+          id="loveInput" 
+          placeholder="${fillText("请输入：{lover}爱{beloved}")}" 
+          style="
+            font-size: 16px;
+            padding: 12px 16px;
+            border: 2px solid rgba(255, 107, 157, 0.3);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 280px;
+            box-sizing: border-box;
+            text-align: center;
+            background: rgba(255,255,255,0.8);
+            color: #4a4a4a;
+          "
+        >
+        <button class="submit-btn" id="unlockBtn">解锁 ♡</button>
+      </div>
+    `;
+    modal.appendChild(inner);
+    document.body.appendChild(modal);
+
+    const input = document.getElementById("loveInput");
+    const unlockBtn = document.getElementById("unlockBtn");
+    const correctAnswer = fillText("{lover}爱{beloved}");
+
+    input.addEventListener('input', function() {
+      const val = input.value.trim();
+      if (val === correctAnswer) {
+        unlockBtn.disabled = false;
+        unlockBtn.classList.remove("locked");
+        unlockBtn.style.background = "";
+      }
+    });
+
+    unlockBtn.onclick = function() {
+      const val = input.value.trim();
+      if (val === correctAnswer) {
+        modal.remove();
+        mainBox.style.display = "none";
+        resetDiary();
+        fillDiaryContent();
+        diaryWrap.style.display = "flex";
+      } else {
+        wrongCount++;
+        if (wrongCount === 1) {
+          modal.remove();
+          pinkPunish();
+        } else {
+          unlockBtn.disabled = true;
+          unlockBtn.classList.add("locked");
+          unlockBtn.style.background = "#ccc";
+          unlockBtn.style.color = "#999";
+        }
+      }
+    };
+  }
+
+  function showFinalModal() {
+    clearAllEffects();
+    mainBox.style.display = "none";
+    const modal = document.createElement("div");
+    modal.className = "submit-modal";
+    const inner = document.createElement("div");
+    inner.className = "submit-modal-inner";
+    inner.innerHTML = `
+      <div style="font-size:18px;font-weight:bold;color:#ff6b9d;margin-bottom:12px;">💗 测试完成</div>
+      <div style="margin:12px 0; color: #666;">${fillText("{lover}有一封信想给你，要看看吗？")}</div>
+      <button class="submit-btn" id="yesBtn">要 ♡</button>
+      <div class="refuse-tip">${fillText("不准拒绝{lover}哦 ^_^")}</div>
+    `;
+    modal.appendChild(inner);
+    document.body.appendChild(modal);
+    document.getElementById("yesBtn").onclick = function() {
+      modal.remove();
+      showInputModal();
+    };
+  }
+
+  // 填充日记内容
+  function fillDiaryContent() {
+    document.getElementById('diaryDate1').innerText = fillText('Day 1 🌙 {lover}的日记');
+    document.getElementById('diaryContent1').innerHTML = fillText(`
+      （大片被爱心划掉的字迹）<br>
+      今天又看到{beloved}了，在窗边<br>
+      你以为拉上窗帘就看不到吗 ♡<br>
+      墙角的缝隙、衣柜角落、门后影子<br>
+      （字迹歪歪扭扭但很认真）我一直在看{beloved}<br>
+      {beloved}被逗笑的样子，好可爱好想抱抱<br>
+      星星：✨✨✨ 视线不会离开<br>
+      （浅粉色晕染痕迹）<span style="color:#ff6b9d;">别躲，跑不掉的</span><br>
+      <span style="color:#ff6b9d;">好喜欢{beloved}</span>好喜欢好喜欢喜欢......<br>
+    `);
+
+    document.getElementById('diaryDate2').innerText = fillText('Day 2 💕 {lover}的日记');
+    document.getElementById('diaryContent2').innerHTML = fillText(`
+      昨晚{beloved}深夜还没睡，我都记下来了<br>
+      {beloved}回头的瞬间，我藏在暗处偷笑<br>
+      （反复涂改：<span style="color:#ff6b9d;">喜欢{beloved}</span>｜盯{beloved}｜<span style="color:#ff6b9d;">占有</span>）<br>
+      空房间的脚步声不是幻觉<br>
+      是我在慢慢靠近{beloved}的每一寸空间<br>
+      <span style="color:#ff6b9d;">为什么不愿意说你也喜欢{lover}？</span><br>
+      （墨迹晕开、断句破碎）<br>
+      回答我，必须回答我……<br>
+    `);
+
+    document.getElementById('diaryDate3').innerText = fillText('Day 3 ♡ {lover}的日记');
+    document.getElementById('diaryContent3').innerHTML = fillText(`
+      我不允许{beloved}拥有除我之外的一切<br>
+      {beloved}的呼吸、身体、情绪都该属于{lover}<br>
+      乖乖留在{lover}身边<br>
+      永远、永远，只准看着{lover}一个人<br>
+      <span style="color:#ff6b9d; font-size:22px; font-weight:bold;">{lover}爱{beloved} ♡</span><br>
+      <span style="color:#ff6b9d; font-size:16px;">爱你</span>
+      <span style="color:#ff6b9d; font-size:18px;">爱你</span>
+      <span style="color:#ff6b9d; font-size:21px;">爱你</span>
+      <span style="color:#ff6b9d; font-size:24px;">爱......</span><br>
+    `);
+
+    document.getElementById('diaryContent4').innerHTML = fillText(`
+      <div style="color:#999;">又只有{lover}自己了……</div>
+      <div style="color:#666;margin:15px 0;">{beloved}愿意成为{lover}的爱人，永远陪着{lover}吗？</div>
+      <button class="start-btn" id="agreeBtn" style="background: linear-gradient(135deg, #ff8fab, #ff6b9d); color: #fff; border: none; padding: 12px 28px; border-radius: 14px; font-size: 16px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 16px rgba(255,107,157,0.3);">
+        {beloved}愿意 ♡
+      </button>
+    `);
+    // 重新绑定agreeBtn事件
+    document.getElementById("agreeBtn").onclick = function() {
+      clearAllEffects();
+      diaryWrap.style.display = "none";
+      const pinkFull = document.createElement("div");
+      pinkFull.className = "pink-full-text";
+      document.body.appendChild(pinkFull);
+      pinkFull.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+          <div class="text-container" style="height:40px; display:flex; align-items:center; justify-content:center; font-size: clamp(24px,5vw,32px);"></div>
+          <button class="pink-confirm-btn" style="display:none;">确认 ♡</button>
+        </div>
+      `;
+      const textDom = pinkFull.querySelector('.text-container');
+      const confirmBtn = pinkFull.querySelector('.pink-confirm-btn');
+      let textArr = [fillText("{lover}爱{beloved}"), fillText("好喜欢{beloved}"), fillText("想和你一直在一起")];
+      let textIndex = 0;
+
+      function showText() {
+        if (textIndex < textArr.length) {
+          textDom.innerText = textArr[textIndex];
+          textIndex++;
+          if (textIndex === textArr.length) {
+            setTimeout(() => { confirmBtn.style.display = "block"; }, 1000);
+          }
+          setTimeout(showText, 1500);
+        }
+      }
+      showText();
+
+      confirmBtn.onclick = function() {
+        pinkFull.remove();
+        const endModal = document.createElement("div");
+        endModal.className = "end-modal";
+        endModal.innerHTML = `
+          <div style="font-size:18px;font-weight:bold;color:#ff6b9d;margin-bottom:15px;">💗 测试已结束</div>
+          <div style="color:#666;margin-bottom:16px;">${fillText("{lover}在等{beloved}")}</div>
+          <button class="start-btn" id="restartBtn" style="background: linear-gradient(135deg, #ff8fab, #ff6b9d); color: #fff; border: none; padding: 12px 28px; border-radius: 14px; font-size: 16px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 16px rgba(255,107,157,0.3);">再来一次 ♡</button>
+        `;
+        document.body.appendChild(endModal);
+        document.getElementById("restartBtn").onclick = function() {
+          endModal.remove();
+          clearAllEffects();
+          resetDiary();
+          current = 0;
+          answers = Array(questions.length).fill(null);
+          wrongCount = 0;
+          lockSubmitBtn = false;
+          fromQ4ToQ5 = false;
+          boxEl.style.display = "none";
+          openStartModal();
+        };
+      };
+    };
+  }
+
+  // 日记页切换
+  document.getElementById("toPage2").onclick = function() {
+    diaryPage1.style.display = "none";
+    diaryPage2.style.display = "block";
+  };
+  document.getElementById("toPage1").onclick = function() {
+    diaryPage2.style.display = "none";
+    diaryPage1.style.display = "block";
+  };
+  document.getElementById("toPage3").onclick = function() {
+    diaryPage2.style.display = "none";
+    diaryPage3.style.display = "block";
+  };
+  document.getElementById("toPage2Back").onclick = function() {
+    diaryPage3.style.display = "none";
+    diaryPage2.style.display = "block";
+  };
+  document.getElementById("toPage4").onclick = function() {
+    diaryPage3.style.display = "none";
+    diaryPage4.style.display = "block";
+  };
+
+
+  // ═══════════════════════════════════════════════════════
+  // 额外萌系特效
+  // ═══════════════════════════════════════════════════════
+
+  function createBgDecorations() {
+    const container = document.getElementById('bgDecorations');
+    if (!container) return;
+    container.innerHTML = '';
+    // 星星
+    for (let i = 0; i < 20; i++) {
+      const star = document.createElement('div');
+      star.className = 'bg-star';
+      star.innerText = ['✨', '⭐', '💫', '🌟'][Math.floor(Math.random() * 4)];
+      star.style.left = Math.random() * 100 + 'vw';
+      star.style.top = Math.random() * 100 + 'vh';
+      star.style.animationDelay = Math.random() * 3 + 's';
+      star.style.fontSize = (12 + Math.random() * 10) + 'px';
+      container.appendChild(star);
+    }
+    // 爱心
+    for (let i = 0; i < 8; i++) {
+      const heart = document.createElement('div');
+      heart.className = 'floating-heart-bg';
+      heart.innerText = ['♡', '♥', '💗', '💕', '💖'][Math.floor(Math.random() * 5)];
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.animationDelay = Math.random() * 8 + 's';
+      heart.style.animationDuration = (6 + Math.random() * 6) + 's';
+      heart.style.fontSize = (14 + Math.random() * 12) + 'px';
+      container.appendChild(heart);
+    }
+  }
+
+  function createBubbles() {
+    for (let i = 0; i < 15; i++) {
+      setTimeout(() => {
+        const b = document.createElement('div');
+        b.className = 'bubble';
+        const size = 20 + Math.random() * 60;
+        b.style.width = size + 'px';
+        b.style.height = size + 'px';
+        b.style.left = Math.random() * 100 + 'vw';
+        b.style.animationDuration = (5 + Math.random() * 5) + 's';
+        b.style.animationDelay = Math.random() * 2 + 's';
+        document.body.appendChild(b);
+        setTimeout(() => b.remove(), 12000);
+      }, i * 300);
+    }
+  }
+
+  function createSparkles() {
+    for (let i = 0; i < 10; i++) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.innerText = ['✨', '💫', '⭐', '🌸'][Math.floor(Math.random() * 4)];
+      s.style.left = Math.random() * 100 + 'vw';
+      s.style.top = Math.random() * 100 + 'vh';
+      s.style.animationDelay = Math.random() * 2 + 's';
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 4000);
+    }
+  }
+
+  // 点击爱心爆发效果
+  function heartBurst(x, y) {
+    const hearts = ['♡', '♥', '💗', '💕', '💖', '💓', '💞'];
+    for (let i = 0; i < 12; i++) {
+      const h = document.createElement('div');
+      h.innerText = hearts[Math.floor(Math.random() * hearts.length)];
+      h.style.position = 'fixed';
+      h.style.left = x + 'px';
+      h.style.top = y + 'px';
+      h.style.fontSize = (14 + Math.random() * 20) + 'px';
+      h.style.pointerEvents = 'none';
+      h.style.zIndex = '99999';
+      h.style.color = '#ff6b9d';
+      h.style.transition = 'all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      document.body.appendChild(h);
+      requestAnimationFrame(() => {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 50 + Math.random() * 150;
+        h.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist - 80}px) scale(0)`;
+        h.style.opacity = '0';
+      });
+      setTimeout(() => h.remove(), 1200);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // 核心渲染
+  // ═══════════════════════════════════════════════════════
+
+  function renderQuestion() {
+    clearAllEffects();
+    const q = questions[current];
+    document.getElementById("progress").innerText = `第 ${current+1} 题 / 共 ${total} 题`;
+    document.getElementById("progressFill").style.width = `${((current + 1) / total) * 100}%`;
+    document.getElementById("question").innerText = fillText(q.q);
+    optionsEl.innerHTML = "";
+    boxEl.style.opacity = "1";
+
+    const emojis = ['💗', '💕', '💖', '💓'];
+
+    q.opt.forEach((item, idx) => {
+      const div = document.createElement("div");
+      div.className = "option";
+      if (answers[current] === idx) div.classList.add("selected");
+      div.innerHTML = `<span class="emoji-prefix">${emojis[idx]}</span>` + fillText(item);
+      div.onclick = () => {
+        answers[current] = idx;
+        document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+        div.classList.add('selected');
+        heartBurst(div.getBoundingClientRect().left + div.offsetWidth / 2, div.getBoundingClientRect().top + div.offsetHeight / 2);
+
+        if (current === 24) {
+          startQ25Effect();
+          return;
+        }
+        if (current === 2) {
+          idx < 3 ? triggerSweet(fillText("{lover}会难过TT"), current + 1) : triggerSweet(fillText("{lover}好开心♡"), current + 1);
+          return;
+        }
+        if (current === 7) {
+          startQ8Effect(idx);
+          return;
+        }
+        if (current === 15) {
+          setTimeout(() => openQ16Modal(), 100);
+          return;
+        }
+        if (current === 16) {
+          if (idx === 0 || idx === 1) {
+            startLoveTyping();
+          } else {
+            div.classList.add("locked");
+            div.innerHTML = `<span class="emoji-prefix">💔</span>` + fillText("{lover}会伤心的...");
+            div.onclick = null;
+          }
+          return;
+        }
+        if (current === 19) {
+          if (idx === 0) {
+            div.innerHTML = `<span class="emoji-prefix">💔</span>` + fillText("{beloved}别拒绝{lover}嘛");
+            div.classList.add("locked");
+            div.onclick = null;
+          }
+          if (idx === 1) {
+            div.innerHTML = `<span class="emoji-prefix">💔</span>` + fillText("{lover}好委屈TT");
+            div.classList.add("locked");
+            div.onclick = null;
+          }
+          if (idx === 2) {
+            div.innerHTML = `<span class="emoji-prefix">💕</span>` + fillText("{lover}会吃醋的～");
+            div.classList.add("locked");
+            div.onclick = null;
+          }
+          if (idx === 3) {
+            div.innerHTML = `<span class="emoji-prefix">💗</span>` + fillText("只能看着{lover}♡");
+          }
+          return;
+        }
+      };
+      optionsEl.appendChild(div);
+    });
+
+    if (current === 4 && fromQ4ToQ5) {
+      startQ5Effect();
+      fromQ4ToQ5 = false;
+    }
+
+    prevBtn.disabled = current === 0;
+    nextBtn.innerText = current === total - 1 ? "提交问卷 ♡" : "下一题";
+  }
+
+  prevBtn.onclick = () => {
+    clearAllEffects();
+    if (current > 0) {
+      current--;
+      renderQuestion();
+    }
+  };
+
+  nextBtn.onclick = () => {
+    clearAllEffects();
+    if (current === 3) fromQ4ToQ5 = true;
+    if (current < total - 1) {
+      current++;
+      renderQuestion();
+    } else {
+      showFinalModal();
+    }
+  };
+
+  // ═══════════════════════════════════════════════════════
+  // 名字输入与开始
+  // ═══════════════════════════════════════════════════════
+
+  document.getElementById('nameBtn').onclick = function() {
+    const loverVal = document.getElementById('loverName').value.trim();
+    const belovedVal = document.getElementById('belovedName').value.trim();
+    if (loverVal) LOVER = loverVal;
+    if (belovedVal) BELOVED = belovedVal;
+    document.getElementById('nameModal').remove();
+    createBgDecorations();
+    createBubbles();
+    openStartModal();
+  };
+
+  function openStartModal() {
+    clearAllEffects();
+    mainBox.style.display = "none";
+
+    const tipTexts = [
+      fillText("<b style='font-size:18px;color:#ff6b9d;'>💗 欢迎参与心动契合度测试</b>"),
+      fillText("<b style='font-size:16px;'>请根据对{lover}的真实感受选择答案</b>"),
+      fillText("<b style='font-size:16px;'>题目含特殊互动效果，请小心被甜到♡</b>"),
+      fillText("<b style='font-size:16px;'>准备就绪，开始答题</b>")
+    ];
+    let idx = 0;
+    const modal = document.createElement("div");
+    modal.className = "start-modal";
+    const textDom = document.createElement("div");
+    textDom.className = "start-text";
+    textDom.innerHTML = tipTexts[idx];
+    const redTip = document.createElement("div");
+    redTip.className = "tiny-tip";
+    redTip.innerText = fillText("注：本测试含糖量极高，如有不适请立即停止作答（{lover}会伤心的）");
+    const btnDom = document.createElement("button");
+    btnDom.className = "start-btn";
+    btnDom.innerText = "继续 ♡";
+    btnDom.onclick = function() {
+      idx++;
+      if (idx < tipTexts.length) {
+        textDom.innerHTML = tipTexts[idx];
+        if (idx === tipTexts.length - 1) {
+          btnDom.innerText = "进入 ♡";
+        }
+      } else {
+        modal.remove();
+        mainBox.style.display = "flex";
+        renderQuestion();
+      }
+    };
+    modal.appendChild(textDom);
+    modal.appendChild(redTip);
+    modal.appendChild(btnDom);
+    document.body.appendChild(modal);
+  }
+
+  // 全局点击爱心效果
+  document.addEventListener('click', (e) => {
+    if (e.target.tagName === 'BUTTON' || e.target.classList.contains('option')) return;
+    if (Math.random() > 0.7) {
+      const h = document.createElement('div');
+      h.innerText = ['♡', '♥', '💗', '💕'][Math.floor(Math.random() * 4)];
+      h.style.position = 'fixed';
+      h.style.left = e.clientX + 'px';
+      h.style.top = e.clientY + 'px';
+      h.style.fontSize = '20px';
+      h.style.pointerEvents = 'none';
+      h.style.zIndex = '99999';
+      h.style.color = '#ff6b9d';
+      h.style.transition = 'all 0.8s ease-out';
+      document.body.appendChild(h);
+      requestAnimationFrame(() => {
+        h.style.transform = 'translateY(-40px) scale(1.5)';
+        h.style.opacity = '0';
+      });
+      setTimeout(() => h.remove(), 800);
+    }
+  });
+
+  // 定期闪光
+  setInterval(() => {
+    if (document.getElementById('mainBox') && mainBox.style.display === 'flex') {
+      createSparkles();
+    }
+  }, 8000);
+</script>
+
+<audio id="bgm" src="bgm.m4a" loop preload="auto"></audio>
+</body>
+</html>
